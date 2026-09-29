@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Mission: ภารกิจพิชิตความปลอดภัย</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Phosphor Icons for game elements -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7); /* Slate 800 with opacity */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background-color: #334155; /* Slate 700 */
+        }
+        
+        .option-btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .correct-ans {
+            background-color: #10b981 !important; /* Emerald 500 */
+            color: white !important;
+            border-color: #059669 !important;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        }
+
+        .wrong-ans {
+            background-color: #ef4444 !important; /* Red 500 */
+            color: white !important;
+            border-color: #b91c1c !important;
+        }
+
+        /* Image Loading Animation */
+        .shimmer {
+            background: #1e293b;
+            background-image: linear-gradient(to right, #1e293b 0%, #334155 20%, #1e293b 40%, #1e293b 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 100%; 
+            animation-duration: 2s;
+            animation-fill-mode: forwards; 
+            animation-iteration-count: infinite;
+            animation-name: placeholderShimmer;
+            animation-timing-function: linear;
+        }
+
+        @keyframes placeholderShimmer {
+            0% { background-position: -468px 0; }
+            100% { background-position: 468px 0; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 w-full max-w-4xl mx-auto">
+        
+        <!-- Screen 1: Start Screen -->
+        <div id="screen-start" class="glass-panel w-full rounded-3xl p-8 sm:p-12 text-center fade-in">
+            <div class="mb-6 flex justify-center">
+                <div class="bg-yellow-400 p-4 rounded-full shadow-[0_0_20px_rgba(250,204,21,0.5)]">
+                    <i class="ph-fill ph-warning-circle text-6xl text-slate-900"></i>
+                </div>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">
+                Safety Mission
+            </h1>
+            <h2 class="text-xl sm:text-2xl font-medium mb-8 text-slate-300">ภารกิจพิชิตความปลอดภัย</h2>
+            
+            <div class="bg-slate-800/50 rounded-xl p-6 mb-8 text-left max-w-xl mx-auto border border-slate-700">
+                <h3 class="text-lg font-semibold text-yellow-400 mb-3"><i class="ph ph-info mr-2"></i>รายละเอียดภารกิจ:</h3>
+                <ul class="space-y-3 text-slate-300 text-sm sm:text-base">
+                    <li class="flex items-start"><i class="ph ph-magnifying-glass text-blue-400 mt-1 mr-3 text-lg"></i> <b>ด่านที่ 1:</b> มองให้เจอ (จับผิดภาพความปลอดภัย) 5 ข้อ</li>
+                    <li class="flex items-start"><i class="ph ph-hard-hat text-orange-400 mt-1 mr-3 text-lg"></i> <b>ด่านที่ 2:</b> เลือกให้ถูก (อุปกรณ์ PPE & Safe Work) 5 ข้อ</li>
+                    <li class="flex items-start"><i class="ph ph-siren text-red-400 mt-1 mr-3 text-lg"></i> <b>ด่านที่ 3:</b> ตัดสินใจให้ไว (สถานการณ์ฉุกเฉิน) 5 ข้อ</li>
+                </ul>
+                <p class="mt-4 text-center text-emerald-400 font-medium">รวม 15 ข้อ / 150 คะแนน</p>
+            </div>
+
+            <!-- ฟอร์มลงทะเบียน -->
+            <div class="bg-slate-800/50 rounded-xl p-6 mb-8 text-left max-w-xl mx-auto border border-slate-700">
+                <h3 class="text-lg font-semibold text-yellow-400 mb-4"><i class="ph ph-user-circle mr-2"></i>ลงทะเบียนผู้เล่น (จำกัดสิทธิ์ 1 ครั้ง/คน)</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">ชื่อ-นามสกุล</label>
+                        <input type="text" id="player-name" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-yellow-400 focus:outline-none" placeholder="ระบุชื่อ-นามสกุล">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">รหัสพนักงาน <span class="text-xs text-slate-500">(ระบบจะใช้ตรวจสอบสิทธิ์)</span></label>
+                        <input type="text" id="player-emp-id" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-yellow-400 focus:outline-none" placeholder="ระบุรหัสพนักงาน">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">แผนก</label>
+                            <input type="text" id="player-dept" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-yellow-400 focus:outline-none" placeholder="ระบุแผนก">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">สาขา</label>
+                            <input type="text" id="player-branch" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-yellow-400 focus:outline-none" placeholder="ระบุสาขา">
+                        </div>
+                    </div>
+                    <div id="reg-error" class="text-red-400 text-sm hidden font-medium text-center mt-2 bg-red-900/20 p-2 rounded"></div>
+                </div>
+            </div>
+
+            <button id="btn-start" class="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-slate-900 font-bold rounded-xl text-xl shadow-lg transform transition hover:-translate-y-1">
+                <i class="ph-bold ph-play mr-2"></i> เริ่มทำภารกิจ
+            </button>
+            <p class="mt-4 text-xs text-slate-500">* แอปนี้ใช้ AI ในการสร้างภาพจำลองสถานการณ์ตามเวลาจริง</p>
+        </div>
+
+        <!-- Screen 2: Game Screen -->
+        <div id="screen-game" class="glass-panel w-full rounded-3xl p-4 sm:p-8 hidden flex-col fade-in">
+            
+            <!-- Header: Progress & Score -->
+            <div class="flex justify-between items-end mb-4 border-b border-slate-700 pb-4">
+                <div>
+                    <span id="level-badge" class="px-3 py-1 bg-blue-500/20 text-blue-300 text-xs sm:text-sm font-semibold rounded-full border border-blue-500/30">
+                        ด่านที่ 1
+                    </span>
+                    <h2 id="level-title" class="text-lg sm:text-xl font-bold mt-2 text-white">มองให้เจอ (จับผิดภาพ)</h2>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs sm:text-sm text-slate-400">คะแนน</p>
+                    <p id="score-display" class="text-2xl sm:text-3xl font-bold text-yellow-400">0</p>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-700 rounded-full h-2.5 mb-6">
+                <div id="progress-bar" class="bg-gradient-to-r from-emerald-400 to-emerald-500 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+            <div class="text-center text-sm text-slate-400 mb-4">
+                ข้อ <span id="current-q-num" class="font-bold text-white">1</span> จาก 15
+            </div>
+
+            <!-- Image Container -->
+            <div class="relative w-full aspect-video sm:aspect-[21/9] rounded-xl overflow-hidden mb-6 border border-slate-600 bg-black shadow-inner flex items-center justify-center group">
+                
+                <!-- Loading State -->
+                <div id="image-loader" class="absolute inset-0 flex flex-col items-center justify-center shimmer z-10">
+                    <i class="ph ph-sparkle text-4xl text-yellow-400 animate-pulse mb-3"></i>
+                    <p class="text-slate-300 text-sm font-medium animate-pulse text-center px-4">AI กำลังสร้างภาพจำลองสถานการณ์...<br><span class="text-xs text-slate-500">(อาจใช้เวลา 5-10 วินาที)</span></p>
+                </div>
+                
+                <!-- Error State -->
+                <div id="image-error" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 z-10 hidden">
+                    <i class="ph ph-warning text-4xl text-orange-500 mb-3"></i>
+                    <p class="text-slate-300 text-sm text-center px-4">ไม่สามารถโหลดภาพจำลองได้<br>โปรดอ่านคำอธิบายในโจทย์แทน</p>
+                </div>
+
+                <!-- Actual Image -->
+                <img id="question-image" src="" alt="ภาพจำลองความปลอดภัย" class="w-full h-full object-cover opacity-0 transition-opacity duration-500 hidden">
+                
+                <!-- AI Badge -->
+                <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur text-white text-[10px] px-2 py-1 rounded-md border border-white/10 z-20">
+                    Generated by Gemini AI
+                </div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="mb-6">
+                <h3 id="question-text" class="text-lg sm:text-xl font-medium text-white leading-relaxed">
+                    <!-- Question injected here -->
+                </h3>
+            </div>
+
+            <!-- Options Grid -->
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-6">
+                <button class="option-btn text-left p-4 rounded-xl border border-slate-600 bg-slate-800/80 text-slate-200 text-sm sm:text-base" onclick="selectOption(0)"></button>
+                <button class="option-btn text-left p-4 rounded-xl border border-slate-600 bg-slate-800/80 text-slate-200 text-sm sm:text-base" onclick="selectOption(1)"></button>
+                <button class="option-btn text-left p-4 rounded-xl border border-slate-600 bg-slate-800/80 text-slate-200 text-sm sm:text-base" onclick="selectOption(2)"></button>
+                <button class="option-btn text-left p-4 rounded-xl border border-slate-600 bg-slate-800/80 text-slate-200 text-sm sm:text-base" onclick="selectOption(3)"></button>
+            </div>
+
+            <!-- Feedback & Next Button -->
+            <div id="feedback-container" class="hidden flex-col items-center mt-2 p-4 rounded-xl border w-full">
+                <div class="flex items-center gap-3 mb-3">
+                    <div id="feedback-icon" class="text-3xl"></div>
+                    <h4 id="feedback-title" class="text-xl font-bold"></h4>
+                </div>
+                <!-- เพิ่มส่วนแสดงคำอธิบาย -->
+                <div id="feedback-desc" class="text-sm md:text-base text-left bg-black/30 p-4 rounded-lg mb-4 w-full text-slate-200 border border-slate-600">
+                </div>
+                <button id="btn-next" class="px-8 py-3 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-lg transition-colors w-full sm:w-auto">
+                    ข้อต่อไป <i class="ph-bold ph-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Result Screen -->
+        <div id="screen-result" class="glass-panel w-full rounded-3xl p-8 sm:p-12 text-center hidden fade-in">
+            <h2 class="text-3xl font-bold mb-2 text-white">ภารกิจเสร็จสิ้น!</h2>
+            <p class="text-slate-400 mb-8">นี่คือผลการประเมินความปลอดภัยของคุณ</p>
+            
+            <div class="relative w-48 h-48 mx-auto mb-8 flex items-center justify-center rounded-full bg-slate-800 border-8 border-slate-700 shadow-2xl">
+                <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#1e293b" stroke-width="8"></circle>
+                    <circle id="score-circle" cx="50" cy="50" r="45" fill="none" stroke="#10b981" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283" class="transition-all duration-1000 ease-out"></circle>
+                </svg>
+                <div class="text-center z-10">
+                    <span id="final-score" class="text-5xl font-bold text-white block">0</span>
+                    <span class="text-sm text-slate-400">จาก 150</span>
+                </div>
+            </div>
+
+            <h3 id="result-message" class="text-2xl font-bold mb-2 text-yellow-400">ยอดเยี่ยม!</h3>
+            <p id="result-desc" class="text-slate-300 mb-8 max-w-md mx-auto">คุณมีจิตสำนึกด้านความปลอดภัยสูงมาก สามารถนำไปปรับใช้ในการทำงานจริงได้อย่างดีเยี่ยม</p>
+            
+            <p id="save-status" class="text-emerald-400 text-sm mb-6 hidden"><i class="ph-fill ph-check-circle mr-1"></i> ระบบได้บันทึกคะแนนของคุณเรียบร้อยแล้ว</p>
+
+            <button onclick="location.reload()" class="px-8 py-3 border-2 border-slate-500 hover:border-slate-300 hover:bg-slate-700 text-white font-medium rounded-xl transition-all">
+                <i class="ph ph-house mr-2"></i> กลับสู่หน้าแรก
+            </button>
+        </div>
+
+    </main>
+
+    <script type="module">
+        // --- Google Apps Script Config ---
+        // !!! ให้นำ URL ที่ได้จากขั้นตอน "Deploy as Web App" มาใส่ตรงนี้ !!!
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMUi2P0CbL2xsbg8EiiYmV7y74FvwmiCJrxvClOM0Us7p1OkDrSwa0dW4YBWM-D5la_Q/exec';
+
+        let userInfo = null; // เก็บข้อมูลผู้เล่น
+
+        // --- 1. Game Data & Prompts ---
+        const prompts = {
+            l1q1: "A realistic photography of a modern office desk setting from a low angle. An office worker is sitting and typing at the desk. Underneath the desk, on the floor, there is a messy tangle of power cords plugged into a power strip. A knocked-over glass of water has created a puddle that is directly touching the power strip. High details, workplace safety hazard, well-lit.",
+            l1q2: "A realistic photography of a maintenance worker in a uniform changing a ceiling light bulb in a corridor. The worker is standing on an aluminum A-frame step ladder. However, the ladder is completely folded closed and leaning precariously against the wall, instead of being safely opened into an A-shape. Industrial safety training illustration, clear lighting, realistic.",
+            l1q3: "A close-up realistic shot of a factory worker cutting a thick steel plate with a handheld electric angle grinder, bright sparks flying. The worker is wearing safety glasses and thick leather gloves. Crucially, the angle grinder has NO safety guard covering the spinning cutting disc (the blade is completely exposed). Extremely Unsafe act, OSHA violation, Bright factory lighting, highly detailed industrial hazard.",
+            l1q4: "A realistic photography of a warehouse worker lifting a large, heavy cardboard box from the concrete floor. The worker is using dangerously incorrect posture: bending completely over at the waist with a severely curved spine and keeping both knees completely straight. Bright warehouse lighting, shelves in background, occupational health hazard concept.",
+            l1q5: "A high-quality realistic photo inside an industrial chemical storage room. Chemical drums and bottles with warning labels are neatly organized on metal shelves. On one of the shelves, directly next to a hazardous chemical container, there is an opened, partially empty clear plastic drinking water bottle. Close up shot, sharp focus, workplace hazard concept.",
+            l2_cover: "A flat lay composition of clean industrial Personal Protective Equipment (PPE) on a dark gray background. Includes a yellow hard hat, clear safety goggles, a bright green high-visibility reflective vest, heavy-duty work boots, and heavy leather gloves. Studio lighting, highly detailed, neat and organized layout, safety first concept.",
+            l3_cover: "A cinematic and realistic shot of a bright red emergency fire alarm flashing on a factory wall. In the blurred background, factory workers in uniforms are calmly walking away in a line along a designated green evacuation walkway. Dramatic lighting, safety and emergency response concept."
+        };
+
+        const questions = [
+            // Level 1
+            {
+                level: 1, levelName: "ด่านที่ 1", levelTitle: "มองให้เจอ (จับผิดภาพความปลอดภัย)",
+                question: "จากภาพจำลอง: พนักงานกำลังพิมพ์งานที่โต๊ะ ใต้โต๊ะมีปลั๊กพ่วงวางบนพื้นซึ่งมีน้ำดื่มหกเจิ่งนอง จุดใดคือความเสี่ยงอันตรายที่สุด?",
+                promptKey: 'l1q1',
+                options: ["การที่พนักงานนั่งพิมพ์งานนานเกินไป", "ปลั๊กพ่วงที่วางทับบริเวณที่มีน้ำหก", "การใช้คอมพิวเตอร์โดยไม่พักสายตา", "การวางแก้วน้ำไว้บนโต๊ะทำงาน"],
+                correct: 1,
+                explanation: "น้ำเป็นตัวนำไฟฟ้าที่ดีเยี่ยม การปล่อยให้ปลั๊กพ่วงสัมผัสกับน้ำหกบนพื้น เสี่ยงต่อการเกิดไฟฟ้าลัดวงจร ไฟไหม้ หรือไฟดูดผู้ปฏิบัติงานจนถึงแก่ชีวิตได้ทันที"
+            },
+            {
+                level: 1, levelName: "ด่านที่ 1", levelTitle: "มองให้เจอ (จับผิดภาพความปลอดภัย)",
+                question: "จากภาพจำลอง: ช่างซ่อมบำรุงกำลังปีนบันไดอลูมิเนียมทรงเอเพื่อเปลี่ยนหลอดไฟ จุดใดคือจุดจับผิดความปลอดภัย?",
+                promptKey: 'l1q2',
+                options: ["การใช้บันไดทรงเอแบบพับพิงกับกำแพง", "การเลือกใช้บันไดที่ทำจากอลูมิเนียม", "การเปลี่ยนหลอดไฟด้วยตัวคนเดียว", "การสวมชุดยูนิฟอร์มสีเข้ม"],
+                correct: 0,
+                explanation: "บันไดทรงเอถูกออกแบบมาให้รับน้ำหนักเมื่อ 'กางออกจนสุดและล็อกบานพับ' เท่านั้น การพับแล้วนำไปพิงกำแพงจะทำให้ฐานไม่มั่นคง และมีโอกาสลื่นไถลหรือพลิกคว่ำได้ง่ายมาก"
+            },
+            {
+                level: 1, levelName: "ด่านที่ 1", levelTitle: "มองให้เจอ (จับผิดภาพความปลอดภัย)",
+                question: "จากภาพจำลอง: พนักงานกำลังใช้หินเจียรไฟฟ้าตัดแผ่นเหล็ก จุดใดคือข้อบกพร่องด้านความปลอดภัยที่ร้ายแรงที่สุด?",
+                promptKey: 'l1q3',
+                options: ["ไม่มีผู้ช่วยคอยจับแผ่นเหล็กให้", "การเลือกใช้หินเจียรไฟฟ้าตัดแผ่นเหล็ก", "ประกายไฟที่กระเด็นออกมาจำนวนมาก", "การถอดฝาครอบป้องกันใบตัดของเครื่องออก"],
+                correct: 3,
+                explanation: "การถอดการ์ด (ฝาครอบป้องกัน) ของหินเจียรออก เป็นพฤติกรรมเสี่ยงร้ายแรง หากใบตัดแตกขณะหมุนด้วยความเร็วสูง เศษใบตัดจะพุ่งเข้าใส่หน้าหรือร่างกายโดยตรง และประกายไฟอาจกระเด็นเข้าหาตัวได้"
+            },
+            {
+                level: 1, levelName: "ด่านที่ 1", levelTitle: "มองให้เจอ (จับผิดภาพความปลอดภัย)",
+                question: "จากภาพจำลอง: พนักงานคลังสินค้ากำลังยกกล่องกระดาษขนาดใหญ่ ข้อใดคือความเสี่ยงที่ซ่อนอยู่ในภาพ?",
+                promptKey: 'l1q4',
+                options: ["ความสว่างของหลอดไฟในคลังสินค้าไม่เพียงพอ", "การก้มหลังและเหยียดเข่าตึงขณะยกของ", "การยกกล่องกระดาษที่มีขนาดใหญ่เกินไป", "ไม่มีรถเข็นช่วยในการเคลื่อนย้าย"],
+                correct: 1,
+                explanation: "การก้มหลังและเหยียดเข่าตึงทำให้กระดูกสันหลังและกล้ามเนื้อหลังต้องรับน้ำหนักทั้งหมด เสี่ยงต่อการเกิดหมอนรองกระดูกเคลื่อน ท่ายกที่ถูกต้องคือต้อง 'ย่อเข่า หลังตรง' แล้วใช้กำลังจากขาในการยืดตัวขึ้น"
+            },
+            {
+                level: 1, levelName: "ด่านที่ 1", levelTitle: "มองให้เจอ (จับผิดภาพความปลอดภัย)",
+                question: "จากภาพจำลอง: ในห้องจัดเก็บสารเคมีของโรงงาน ข้อใดคือจุดที่ไม่ปลอดภัยตามหลัก 5ส และอาชีวอนามัย?",
+                promptKey: 'l1q5',
+                options: ["แสงสว่างในห้องจัดเก็บไม่เพียงพอ", "การเปิดขวดน้ำดื่มทิ้งไว้โดยไม่ปิดฝา", "การวางขวดน้ำดื่มปะปนกับสารเคมี", "การจัดเรียงถังสารเคมีชิดกันเกินไป"],
+                correct: 2,
+                explanation: "กฎเหล็กของความปลอดภัยคือ 'ห้ามนำอาหารและเครื่องดื่มเข้ามาในพื้นที่จัดเก็บสารเคมี' เนื่องจากไอระเหยของสารเคมีอาจปนเปื้อนลงไปในน้ำดื่ม และอาจเกิดความสับสนเผลอดื่มสารเคมีที่ใส่ขวดน้ำไว้ได้"
+            },
+            // Level 2
+            {
+                level: 2, levelName: "ด่านที่ 2", levelTitle: "เลือกให้ถูก (PPE & Safe Work)",
+                question: "คุณต้องเข้าไปตรวจสอบหน้างานในพื้นที่ก่อสร้างที่มีเครื่องจักรหนักกำลังทำงาน ชุดอุปกรณ์ PPE พื้นฐานใดที่คุณต้องสวมใส่?",
+                promptKey: 'l2_cover',
+                options: ["แว่นตากันแดด รองเท้าผ้าใบ และหมวกแก๊ป", "หน้ากากอนามัย และถุงมือผ้า", "หมวกนิรภัย รองเท้านิรภัย และเสื้อสะท้อนแสง", "ชุดป้องกันสารเคมี และรองเท้าบูทยาง"],
+                correct: 2,
+                explanation: "พื้นที่ก่อสร้างมีความเสี่ยงจากวัสดุตกหล่น (ต้องใช้หมวกนิรภัย) การเหยียบตะปูหรือของหล่นทับเท้า (ต้องใช้รองเท้านิรภัย) และมีรถจักรกลหนักทำงาน (ต้องใส่เสื้อสะท้อนแสงให้คนขับมองเห็นได้ชัดเจน)"
+            },
+            {
+                level: 2, levelName: "ด่านที่ 2", levelTitle: "เลือกให้ถูก (PPE & Safe Work)",
+                question: "หากคุณได้รับมอบหมายให้ผสมน้ำยาทำความสะอาดที่มีฤทธิ์กัดกร่อนสูง คุณควรเลือกใช้ถุงมือประเภทใดจึงจะปลอดภัยที่สุด?",
+                promptKey: 'l2_cover',
+                options: ["ถุงมือยางไนไตร (Nitrile Gloves)", "ถุงมือผ้าฝ้ายเคลือบจุดยาง", "ถุงมือหนังกันความร้อน", "ถุงมือพลาสติกใสแบบใช้แล้วทิ้ง"],
+                correct: 0,
+                explanation: "ถุงมือยางไนไตร (Nitrile) มีคุณสมบัติทนทานต่อน้ำมัน สารเคมี และสารกัดกร่อนได้ดีเยี่ยม ถุงมือผ้าจะซับสารเคมีเข้าสู่ผิวหนัง ส่วนถุงมือพลาสติกบางเกินไปและฉีกขาดง่าย"
+            },
+            {
+                level: 2, levelName: "ด่านที่ 2", levelTitle: "เลือกให้ถูก (PPE & Safe Work)",
+                question: "เมื่อพนักงานต้องขึ้นไปปฏิบัติงานบนที่สูงเกิน 2 เมตรจากพื้นดิน อุปกรณ์ความปลอดภัยใดที่ขาดไม่ได้อย่างเด็ดขาด?",
+                promptKey: 'l2_cover',
+                options: ["หมวกนิรภัยปีกกว้าง", "เข็มขัดพยุงหลัง (Back Support)", "เชือกนิรภัยแบบเส้นเดียว", "เข็มขัดนิรภัยแบบเต็มตัว (Full Body Harness)"],
+                correct: 3,
+                explanation: "การทำงานบนที่สูง (เกิน 2 เมตรตามกฎหมายไทย) ต้องสวมใส่ 'เข็มขัดนิรภัยแบบเต็มตัว (Full Body Harness)' พร้อมสายเกี่ยวนิรภัยแบบ 2 เส้น (Double Lanyard) เพื่อกระจายแรงกระชากหากเกิดการพลัดตก"
+            },
+            {
+                level: 2, levelName: "ด่านที่ 2", levelTitle: "เลือกให้ถูก (PPE & Safe Work)",
+                question: "หากคุณพบป้ายสัญลักษณ์รูปวงกลมพื้นสีฟ้า ภายในมีรูปพรรณนาคนกำลังสวมแว่นตา ป้ายนี้มีความหมายว่าอย่างไร?",
+                promptKey: 'l2_cover',
+                options: ["ระวังอันตรายจากสารเคมีเข้าตา", "บังคับให้สวมแว่นตานิรภัยในพื้นที่นี้", "ห้ามถอดแว่นสายตาขณะทำงาน", "จุดบริการล้างตาฉุกเฉิน"],
+                correct: 1,
+                explanation: "ตามมาตรฐานป้ายความปลอดภัย 'สีฟ้า รูปวงกลม' หมายถึง 'ป้ายบังคับ' (Mandatory Sign) หากเป็นรูปคนสวมแว่น แปลว่าบังคับให้ทุกคนต้องสวมแว่นตานิรภัยก่อนเข้าพื้นที่นั้นอย่างเด็ดขาด"
+            },
+            {
+                level: 2, levelName: "ด่านที่ 2", levelTitle: "เลือกให้ถูก (PPE & Safe Work)",
+                question: "ก่อนซ่อมแซมเครื่องจักร มาตรการความปลอดภัย (Safe Work) ใดที่สำคัญที่สุดในการป้องกันอันตรายจากเครื่องจักรทำงานกะทันหัน?",
+                promptKey: 'l2_cover',
+                options: ["การนำถังดับเพลิงมาเตรียมไว้ใกล้เครื่องจักร", "การแจ้งหัวหน้างานด้วยวาจา", "การตัดแยกระบบพลังงานและแขวนป้ายเตือน (LOTO)", "การกั้นพื้นที่ด้วยกรวยจราจร"],
+                correct: 2,
+                explanation: "มาตรการ LOTO (Lockout/Tagout) คือการตัดสับสวิตช์พลังงาน ล็อกกุญแจ และแขวนป้ายเตือน เป็นหัวใจสำคัญของการซ่อมบำรุง เพื่อป้องกันไม่ให้มีใครเผลอไปเปิดสวิตช์เครื่องจักรขณะที่ช่างกำลังทำงานอยู่"
+            },
+            // Level 3
+            {
+                level: 3, levelName: "ด่านที่ 3", levelTitle: "ตัดสินใจให้ไว (What Would You Do?)",
+                question: "ขณะเดินผ่านสายการผลิต คุณพบเพื่อนร่วมงานกำลังถูกไฟดูดจากเครื่องจักรและไม่สามารถขยับตัวได้ สิ่งแรกที่ต้องทำคืออะไร?",
+                promptKey: 'l3_cover',
+                options: ["รีบตัดกระแสไฟฟ้าที่เมนสวิตช์ทันที", "โทรศัพท์แจ้งหน่วยกู้ภัยเพื่อขอความช่วยเหลือ", "วิ่งเข้าไปดึงตัวเพื่อนออกมาให้เร็วที่สุด", "ตะโกนเรียกให้คนอื่นมาช่วยดึง"],
+                correct: 0,
+                explanation: "หลักการแรกของการช่วยคนถูกไฟดูดคือ 'ต้องตัดแหล่งจ่ายไฟ' (เมนสวิตช์/เบรกเกอร์) ก่อนเสมอ ห้ามสัมผัสตัวผู้ถูกไฟดูดโดยตรงเด็ดขาด เพราะกระแสไฟจะวิ่งเข้าสู่ตัวผู้ช่วยเหลือด้วย"
+            },
+            {
+                level: 3, levelName: "ด่านที่ 3", levelTitle: "ตัดสินใจให้ไว (What Would You Do?)",
+                question: "คุณกำลังทำงานอยู่ในออฟฟิศ จู่ๆ สัญญาณเตือนไฟไหม้ก็ดังขึ้น แต่มองไม่เห็นควันไฟหรือเปลวเพลิง การตัดสินใจที่ถูกต้องคือข้อใด?",
+                promptKey: 'l3_cover',
+                options: ["นั่งทำงานต่อไปจนกว่าจะมีคนมาสั่งให้อพยพ", "รีบเดินไปสำรวจหาต้นเพลิงด้วยตัวเอง", "หยุดงานและอพยพตามเส้นทางหนีไฟไปจุดรวมพล", "เก็บเอกสารสำคัญทั้งหมดใส่กระเป๋าก่อนค่อยหนี"],
+                correct: 2,
+                explanation: "เมื่อได้ยินสัญญาณเตือนภัย ให้สันนิษฐานไว้ก่อนว่าเป็นเหตุจริง ห้ามเพิกเฉยหรือเสียเวลาเก็บของ ให้มีสติแล้วอพยพออกตามเส้นทางหนีไฟไปยังจุดรวมพลทันที เพื่อความปลอดภัยสูงสุด"
+            },
+            {
+                level: 3, levelName: "ด่านที่ 3", levelTitle: "ตัดสินใจให้ไว (What Would You Do?)",
+                question: "เกิดอุบัติเหตุสารเคมีเหลวกระเด็นเข้าตาเพื่อนร่วมงานของคุณ คุณจะปฐมพยาบาลเบื้องต้นอย่างไร?",
+                promptKey: 'l3_cover',
+                options: ["ให้นอนพักหลับตานิ่งๆ จนกว่ารถพยาบาลจะมาถึง", "นำพาไปล้างตาด้วยน้ำสะอาดอย่างน้อย 15 นาที", "ใช้ผ้าสะอาดเช็ดถูบริเวณดวงตาเบาๆ", "หายาหยอดตามาหยอดเพื่อบรรเทาอาการ"],
+                correct: 1,
+                explanation: "หากสารเคมีเข้าตา ต้องรีบพาไปที่อ่างล้างตาฉุกเฉิน (Eyewash Station) หรือล้างด้วยน้ำสะอาดที่ไหลผ่านตาอย่างต่อเนื่องเป็นเวลาอย่างน้อย 15 นาที ห้ามขยี้ตาโดยเด็ดขาด แล้วจึงนำส่งแพทย์"
+            },
+            {
+                level: 3, levelName: "ด่านที่ 3", levelTitle: "ตัดสินใจให้ไว (What Would You Do?)",
+                question: "คุณบังเอิญเดินไปพบน้ำมันเครื่องหกเป็นวงกว้างอยู่บนทางเดินหลักในโรงงาน คุณควรตัดสินใจทำสิ่งใดก่อน?",
+                promptKey: 'l3_cover',
+                options: ["เดินข้ามกองน้ำมันนั้นไปอย่างระมัดระวัง", "ไปตามแม่บ้านมาทำความสะอาดทันที", "ถ่ายรูปลงไลน์กลุ่มโรงงานแล้วเดินจากไป", "นำป้ายเตือนมาวางกั้นบริเวณและแจ้งผู้รับผิดชอบ"],
+                correct: 3,
+                explanation: "น้ำมันหกคือความเสี่ยงในการลื่นล้ม (Slips, Trips, and Falls) สิ่งแรกที่ต้องทำคือ 'ป้องกันไม่ให้คนอื่นมาเดินเหยียบ' โดยการนำป้ายเตือน/กรวยมากั้นพื้นที่ไว้ก่อน แล้วจึงรีบดำเนินการหรือแจ้งผู้เกี่ยวข้องมาทำความสะอาด"
+            },
+            {
+                level: 3, levelName: "ด่านที่ 3", levelTitle: "ตัดสินใจให้ไว (What Would You Do?)",
+                question: "ขณะที่คุณกำลังนั่งประชุมอยู่ในห้องบนชั้น 3 เกิดแผ่นดินไหวรุนแรงจนอาคารสั่นสะเทือน คุณควรเอาตัวรอดอย่างไร?",
+                promptKey: 'l3_cover',
+                options: ["รีบวิ่งออกจากห้องและลงบันไดให้เร็วที่สุด", "หมอบลงใต้โต๊ะที่แข็งแรงและใช้มือยึดจับขาโต๊ะไว้", "วิ่งไปที่หน้าต่างเพื่อดูว่าเกิดอะไรขึ้นภายนอก", "มุดเข้าไปหลบซ่อนตัวอยู่ภายในตู้เก็บเอกสาร"],
+                correct: 1,
+                explanation: "หลักการเอาตัวรอดจากแผ่นดินไหวคือ 'Drop, Cover, Hold on' (หมอบลง บังศีรษะ/หลบใต้โต๊ะที่แข็งแรง และยึดจับไว้) ห้ามวิ่งลงบันไดขณะเกิดแผ่นดินไหวเด็ดขาด เพราะอาจสะดุดล้มหรือโดนสิ่งของหล่นทับขณะวิ่งได้"
+            }
+        ];
+
+        // --- 2. State & Audio ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let imageCache = {}; // Cache generated images by promptKey
+        let hasAnswered = false;
+        
+        // Tone.js Synthesizers for Sound Effects
+        let synth, errorSynth;
+
+        function initAudio() {
+            if(!synth) {
+                synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                synth.set({
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.05, decay: 0.1, sustain: 0.3, release: 1 }
+                });
+                
+                errorSynth = new Tone.Synth().toDestination();
+                errorSynth.set({
+                    oscillator: { type: "sawtooth" },
+                    envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 }
+                });
+            }
+        }
+
+        function playCorrectSound() {
+            if(!synth) return;
+            const now = Tone.now();
+            synth.triggerAttackRelease(["C5", "E5", "G5"], "8n", now);
+        }
+
+        function playWrongSound() {
+            if(!errorSynth) return;
+            errorSynth.triggerAttackRelease("G2", "8n");
+        }
+
+        // --- 3. Gemini Image API Integration ---
+        async function fetchImageWithRetry(promptText, retries = 3, delay = 1000) {
+            const apiKey = ""; // Canvas will automatically provide it
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{
+                    role: 'user',
+                    parts: [{ text: promptText }]
+                }],
+                generationConfig: {
+                    responseModalities: ['IMAGE'],
+                    imageConfig: { aspectRatio: "16:9" }
+                }
+            };
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 429) {
+                        // Throttled, exponential backoff
+                        await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                        continue;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('API Error ' + response.status);
+                    }
+
+                    const result = await response.json();
+                    const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+                    if (part && part.inlineData) {
+                        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+                    } else {
+                        throw new Error('No image in response');
+                    }
+                } catch (err) {
+                    if (i === retries - 1) return null; // Fail silently on last retry
+                    await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                }
+            }
+            return null;
+        }
+
+        // --- 4. Game Logic Flow ---
+        const uiElements = {
+            screenStart: document.getElementById('screen-start'),
+            screenGame: document.getElementById('screen-game'),
+            screenResult: document.getElementById('screen-result'),
+            levelBadge: document.getElementById('level-badge'),
+            levelTitle: document.getElementById('level-title'),
+            scoreDisplay: document.getElementById('score-display'),
+            progressBar: document.getElementById('progress-bar'),
+            currentQNum: document.getElementById('current-q-num'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            imgLoader: document.getElementById('image-loader'),
+            imgError: document.getElementById('image-error'),
+            qImage: document.getElementById('question-image'),
+            feedbackCont: document.getElementById('feedback-container'),
+            feedbackIcon: document.getElementById('feedback-icon'),
+            feedbackTitle: document.getElementById('feedback-title'),
+            feedbackDesc: document.getElementById('feedback-desc'), // เพิ่ม Element ใหม่
+            btnNext: document.getElementById('btn-next')
+        };
+
+        // --- ระบบโหลดภาพล่วงหน้า (Background Pre-loading) ---
+        async function preloadImagesBackground() {
+            // โหลดทีละรูปหน่วงเวลาเล็กน้อย เพื่อป้องกัน API โดนตัด (Rate Limit)
+            const keysToPreload = ['l1q1', 'l1q2', 'l1q3', 'l1q4', 'l1q5', 'l2_cover', 'l3_cover'];
+            for (const key of keysToPreload) {
+                if (!imageCache[key]) {
+                    fetchImageWithRetry(prompts[key]).then(url => {
+                        if (url) imageCache[key] = url;
+                    });
+                    // หน่วงเวลา 2 วินาทีก่อนสั่งเจนรูปถัดไป
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+            }
+        }
+
+        // เริ่มโหลดภาพตั้งแต่เปิดหน้าเว็บเสร็จ
+        window.addEventListener('load', async () => {
+            preloadImagesBackground();
+        });
+
+        document.getElementById('btn-start').addEventListener('click', async () => {
+            const btnStart = document.getElementById('btn-start');
+            const errorDiv = document.getElementById('reg-error');
+            errorDiv.classList.add('hidden');
+            
+            // Validate Form
+            const name = document.getElementById('player-name').value.trim();
+            const empId = document.getElementById('player-emp-id').value.trim();
+            const dept = document.getElementById('player-dept').value.trim();
+            const branch = document.getElementById('player-branch').value.trim();
+
+            if (!name || !empId || !dept || !branch) {
+                errorDiv.innerHTML = "<i class='ph-fill ph-warning-circle mr-1'></i> กรุณากรอกข้อมูลให้ครบถ้วนก่อนเริ่มภารกิจ";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Check if played before (Google Sheets)
+            if (SCRIPT_URL && SCRIPT_URL !== 'YOUR_WEB_APP_URL_HERE') {
+                btnStart.innerHTML = '<i class="ph ph-spinner animate-spin mr-2"></i> กำลังตรวจสอบสิทธิ์...';
+                btnStart.disabled = true;
+
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'check', empId: empId }),
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    });
+                    const result = await response.json();
+
+                    if (result.exists) {
+                        errorDiv.innerHTML = "<i class='ph-fill ph-prohibit mr-1'></i> รหัสพนักงานนี้ทำการทดสอบไปแล้ว (จำกัด 1 ครั้ง/คน)";
+                        errorDiv.classList.remove('hidden');
+                        btnStart.innerHTML = '<i class="ph-bold ph-play mr-2"></i> เริ่มทำภารกิจ';
+                        btnStart.disabled = false;
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Sheet check error: ", e);
+                }
+            }
+
+            // จัดเก็บข้อมูลลงหน่วยความจำระหว่างเล่น
+            userInfo = { name, empId, dept, branch };
+            
+            btnStart.innerHTML = '<i class="ph-bold ph-play mr-2"></i> เริ่มทำภารกิจ';
+            btnStart.disabled = false;
+
+            await Tone.start();
+            initAudio();
+            uiElements.screenStart.classList.add('hidden');
+            uiElements.screenGame.classList.remove('hidden');
+            uiElements.screenGame.classList.add('flex');
+            loadQuestion(0);
+        });
+
+        uiElements.btnNext.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion(currentQuestionIndex);
+            } else {
+                showResults();
+            }
+        });
+
+        async function loadQuestion(index) {
+            hasAnswered = false;
+            const q = questions[index];
+            
+            // Update UI Texts
+            uiElements.levelBadge.innerText = q.levelName;
+            
+            // Adjust badge colors based on level
+            uiElements.levelBadge.className = `px-3 py-1 text-xs sm:text-sm font-semibold rounded-full border ${
+                q.level === 1 ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
+                q.level === 2 ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
+                'bg-red-500/20 text-red-300 border-red-500/30'
+            }`;
+            
+            uiElements.levelTitle.innerText = q.levelTitle;
+            uiElements.currentQNum.innerText = index + 1;
+            uiElements.progressBar.style.width = `${((index) / questions.length) * 100}%`;
+            uiElements.questionText.innerText = `${index + 1}. ${q.question}`;
+            
+            // Hide feedback
+            uiElements.feedbackCont.classList.add('hidden');
+            
+            // Render Options
+            const btns = uiElements.optionsContainer.querySelectorAll('button');
+            btns.forEach((btn, i) => {
+                btn.innerText = q.options[i];
+                btn.className = "option-btn text-left p-4 rounded-xl border border-slate-600 bg-slate-800/80 text-slate-200 text-sm sm:text-base";
+                btn.disabled = false;
+            });
+
+            // Handle Image Loading
+            uiElements.qImage.classList.add('hidden');
+            uiElements.qImage.classList.remove('opacity-100');
+            uiElements.qImage.classList.add('opacity-0');
+            uiElements.imgError.classList.add('hidden');
+            uiElements.imgLoader.classList.remove('hidden');
+
+            const pKey = q.promptKey;
+            
+            // If already cached, show immediately
+            if (imageCache[pKey]) {
+                showImage(imageCache[pKey]);
+            } else {
+                // Fetch from Gemini API
+                const promptText = prompts[pKey];
+                const base64Url = await fetchImageWithRetry(promptText);
+                
+                if (base64Url) {
+                    imageCache[pKey] = base64Url;
+                    showImage(base64Url);
+                } else {
+                    // API Failed
+                    uiElements.imgLoader.classList.add('hidden');
+                    uiElements.imgError.classList.remove('hidden');
+                }
+            }
+        }
+
+        function showImage(url) {
+            uiElements.qImage.src = url;
+            uiElements.imgLoader.classList.add('hidden');
+            uiElements.imgError.classList.add('hidden');
+            uiElements.qImage.classList.remove('hidden');
+            // Trigger reflow for fade in
+            void uiElements.qImage.offsetWidth; 
+            uiElements.qImage.classList.replace('opacity-0', 'opacity-100');
+        }
+
+        window.selectOption = function(selectedIndex) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+            
+            const q = questions[currentQuestionIndex];
+            const btns = uiElements.optionsContainer.querySelectorAll('button');
+            const isCorrect = (selectedIndex === q.correct);
+
+            // Disable all buttons
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) {
+                    btn.classList.add('correct-ans'); // Highlight correct answer
+                } else if (i === selectedIndex && !isCorrect) {
+                    btn.classList.add('wrong-ans'); // Highlight wrong choice user made
+                } else {
+                    btn.classList.add('opacity-50'); // Dim others
+                }
+            });
+
+            // ใส่คำอธิบาย
+            uiElements.feedbackDesc.innerHTML = `<span class="font-bold text-yellow-400"><i class="ph ph-info mr-1"></i> เหตุผลด้านความปลอดภัย:</span><br>${q.explanation}`;
+
+            // Update Score & Show Feedback
+            uiElements.feedbackCont.classList.remove('hidden');
+            uiElements.feedbackCont.classList.add('flex');
+
+            if (isCorrect) {
+                score += 10;
+                uiElements.scoreDisplay.innerText = score;
+                uiElements.feedbackCont.className = "flex flex-col items-center mt-2 p-5 rounded-xl border border-emerald-500/50 bg-emerald-900/30 fade-in";
+                uiElements.feedbackIcon.innerHTML = '<i class="ph-fill ph-check-circle text-emerald-400"></i>';
+                uiElements.feedbackTitle.innerText = "ถูกต้อง! (+10 คะแนน)";
+                uiElements.feedbackTitle.className = "text-xl font-bold text-emerald-400";
+                playCorrectSound();
+            } else {
+                uiElements.feedbackCont.className = "flex flex-col items-center mt-2 p-5 rounded-xl border border-red-500/50 bg-red-900/30 fade-in";
+                uiElements.feedbackIcon.innerHTML = '<i class="ph-fill ph-x-circle text-red-400"></i>';
+                uiElements.feedbackTitle.innerText = "พลาดไปนิดนะ!";
+                uiElements.feedbackTitle.className = "text-xl font-bold text-red-400";
+                playWrongSound();
+            }
+        };
+
+        function showResults() {
+            uiElements.screenGame.classList.remove('flex');
+            uiElements.screenGame.classList.add('hidden');
+            uiElements.screenResult.classList.remove('hidden');
+            
+            // Animate final score and circle
+            const maxScore = 150;
+            const percentage = (score / maxScore) * 100;
+            
+            // Animate number
+            let currentDisplayScore = 0;
+            const scoreElement = document.getElementById('final-score');
+            const interval = setInterval(() => {
+                if (currentDisplayScore >= score) {
+                    clearInterval(interval);
+                    scoreElement.innerText = score;
+                } else {
+                    currentDisplayScore += 2;
+                    scoreElement.innerText = currentDisplayScore;
+                }
+            }, 20);
+
+            // Animate SVG Circle
+            const circle = document.getElementById('score-circle');
+            const dashoffset = 283 - (283 * percentage) / 100;
+            setTimeout(() => {
+                circle.style.strokeDashoffset = dashoffset;
+                
+                // Color based on score
+                if(percentage >= 80) circle.style.stroke = "#10b981"; // Green
+                else if(percentage >= 50) circle.style.stroke = "#f59e0b"; // Yellow
+                else circle.style.stroke = "#ef4444"; // Red
+            }, 100);
+
+            // Message based on score
+            const msgTitle = document.getElementById('result-message');
+            const msgDesc = document.getElementById('result-desc');
+            
+            if (score === 150) {
+                msgTitle.innerText = "Perfect! Safety Hero!";
+                msgTitle.className = "text-2xl font-bold mb-2 text-emerald-400";
+                msgDesc.innerText = "ไร้ที่ติ! คุณมีจิตสำนึกด้านความปลอดภัยสูงมาก เป็นแบบอย่างที่ดีในที่ทำงาน";
+                if(synth) synth.triggerAttackRelease(["C5", "E5", "G5", "C6"], "2n", Tone.now());
+            } else if (score >= 100) {
+                msgTitle.innerText = "ยอดเยี่ยม!";
+                msgTitle.className = "text-2xl font-bold mb-2 text-yellow-400";
+                msgDesc.innerText = "คุณมีความรู้ความเข้าใจเรื่องความปลอดภัยในเกณฑ์ดีมาก สามารถทำงานได้อย่างปลอดภัย";
+            } else if (score >= 60) {
+                msgTitle.innerText = "ผ่านเกณฑ์!";
+                msgTitle.className = "text-2xl font-bold mb-2 text-orange-400";
+                msgDesc.innerText = "คุณมีความรู้พื้นฐาน แต่ควรทบทวนเรื่องจุดเสี่ยงบางจุดเพิ่มเติมเพื่อความปลอดภัยสูงสุด";
+            } else {
+                msgTitle.innerText = "ต้องทบทวนใหม่!";
+                msgTitle.className = "text-2xl font-bold mb-2 text-red-400";
+                msgDesc.innerText = "อันตรายมาก! คุณจำเป็นต้องเข้ารับการอบรมและทบทวนความรู้ด้านความปลอดภัยโดยด่วน";
+            }
+
+            // Save Data to Google Sheets ตอนจบเกม
+            if (userInfo && SCRIPT_URL !== 'YOUR_WEB_APP_URL_HERE') {
+                try {
+                    fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'save',
+                            empId: userInfo.empId,
+                            name: userInfo.name,
+                            dept: userInfo.dept,
+                            branch: userInfo.branch,
+                            score: score,
+                            maxScore: 150
+                        }),
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    }).then(res => res.json()).then(data => {
+                        if (data.success) {
+                            document.getElementById('save-status').classList.remove('hidden');
+                        }
+                    });
+                } catch (e) {
+                    console.error("Error saving result", e);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
