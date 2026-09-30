@@ -340,9 +340,11 @@
             const branchInput = document.getElementById('player-branch');
             const dataList = document.getElementById('branch-list');
             
-            // ลดเวลา Timeout เหลือ 8 วินาที
+            branchInput.placeholder = "⏳ กำลังโหลดข้อมูลสาขา...";
+            
+            // ขยายเวลา Timeout เป็น 15 วินาที
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
             
             try {
                 const response = await fetch(SCRIPT_URL, {
@@ -358,23 +360,27 @@
                 try {
                     const result = JSON.parse(textRes);
                     if (result.branches && result.branches.length > 0) {
+                        // โหลดข้อมูลสำเร็จ
                         result.branches.forEach(branch => {
                             const option = document.createElement('option');
                             option.value = branch;
                             dataList.appendChild(option);
                         });
-                        branchInput.placeholder = "ระบุสาขา (มีระบบค้นหา)";
+                        branchInput.placeholder = `✅ โหลดสำเร็จ (${result.branches.length} สาขา) พิมพ์เพื่อเลือก`;
                     } else {
-                        branchInput.placeholder = "ไม่พบสาขาในตาราง (ระบุเองได้เลย)";
+                        // โค้ดทำงานได้ แต่ไม่เจอรายชื่อในชีต
+                        branchInput.placeholder = "❌ ชีตว่าง/ผิดชื่อ (พิมพ์สาขาเองได้เลย)";
                     }
                 } catch (parseError) {
-                    console.warn("ไม่สามารถดึงข้อมูลสาขาได้:", textRes);
-                    branchInput.placeholder = "ลิงก์ Apps Script ผิด! (ระบุสาขาเอง)";
+                    console.warn("Parse Error. Data received:", textRes.substring(0, 100));
+                    // Google ส่งหน้า Login กลับมาแทนข้อมูล
+                    branchInput.placeholder = "⚠️ ติดสิทธิ์ Google! (พิมพ์สาขาเองได้เลย)";
                 }
             } catch (e) {
                 clearTimeout(timeoutId);
-                console.warn("ดึงข้อมูลสาขาเบื้องหลังล้มเหลว:", e);
-                branchInput.placeholder = "โหมดออฟไลน์: ระบุสาขาเอง";
+                console.warn("Network Error:", e);
+                // เน็ตหลุด หรือ Google ช้ามาก
+                branchInput.placeholder = "⚠️️ เซิร์ฟเวอร์ช้า/ออฟไลน์ (พิมพ์สาขาเองได้เลย)";
             }
         }
 
